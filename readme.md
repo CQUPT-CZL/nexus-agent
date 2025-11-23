@@ -1,5 +1,7 @@
 # Nexus Agent
 
+![Nexus Agent Dashboard](image.png)
+
 Nexus Agent is a web-based dashboard that provides real-time monitoring and management of agents. It consists of a Python-based server and a web-based dashboard.
 
 ## Project Structure
