@@ -13,10 +13,91 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
         body { background-color: #020617; color: #e2e8f0; }
+        @keyframes moveGradient {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+        .neon-line {
+            background-image: linear-gradient(90deg, #f0abfc33, #22d3ee33, #34d39933, #22d3ee33, #f0abfc33);
+            background-size: 200% 100%;
+            box-shadow: 0 0 12px rgba(59,130,246,0.12);
+            animation: moveGradient 10s linear infinite;
+        }
+        @keyframes sweep {
+            0% { transform: translateX(-40%) skewX(-15deg); }
+            100% { transform: translateX(140%) skewX(-15deg); }
+        }
+        .flow-card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -40%;
+            width: 40%; height: 100%;
+            background: linear-gradient(115deg, rgba(99,102,241,0), rgba(99,102,241,0.25), rgba(34,197,94,0.15), rgba(99,102,241,0));
+            opacity: 0;
+            transition: opacity .3s ease;
+            pointer-events: none;
+            animation: sweep 8s linear infinite;
+        }
+        .flow-card:hover::after { opacity: 1; }
+        .flow-card {
+            position: relative;
+            overflow: hidden;
+        }
+        .flow-text {
+            background-image: linear-gradient(90deg, #34d399, #22d3ee, #6366f1, #22d3ee, #34d399);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: moveGradient 6s linear infinite;
+        }
+        .hacker-bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+        .hacker-bg > * { position: absolute; inset: 0; }
+        #matrix-bg { width: 100%; height: 100%; }
+        .bg-grid {
+            background-image: radial-gradient(circle at 0 0, rgba(34,197,94,0.12) 0, rgba(34,197,94,0) 40%), radial-gradient(circle at 100% 100%, rgba(56,189,248,0.10) 0, rgba(56,189,248,0) 40%), repeating-linear-gradient(0deg, rgba(148,163,184,0.08) 0px, rgba(148,163,184,0.08) 1px, transparent 1px, transparent 48px), repeating-linear-gradient(90deg, rgba(148,163,184,0.06) 0px, rgba(148,163,184,0.06) 1px, transparent 1px, transparent 48px);
+            opacity: 0.35;
+            filter: saturate(120%);
+            animation: gridMove 40s linear infinite;
+        }
+        @keyframes gridMove { to { background-position: 0 200px, 0 -200px, 0 200px, 200px 0; } }
+        .bg-scanlines { background-image: repeating-linear-gradient(0deg, rgba(2,6,23,0) 0px, rgba(2,6,23,0) 3px, rgba(94,234,212,0.05) 4px, rgba(2,6,23,0) 5px); mix-blend-mode: soft-light; opacity: 0.35; }
+        .bg-glow { background: radial-gradient(45% 60% at 60% 10%, rgba(99,102,241,0.12), rgba(99,102,241,0)), radial-gradient(30% 50% at 0% 100%, rgba(16,185,129,0.10), rgba(16,185,129,0)); filter: blur(60px); opacity: 0.5; }
+        #root { position: relative; z-index: 10; }
     </style>
 </head>
 <body>
+    <div class="hacker-bg">
+        <canvas id="matrix-bg"></canvas>
+        <div class="bg-grid"></div>
+        <div class="bg-scanlines"></div>
+        <div class="bg-glow"></div>
+    </div>
     <div id="root"></div>
+    <footer class="mt-3">
+      <div class="mx-auto max-w-3xl px-3">
+        <div class="neon-line h-px w-full mb-2"></div>
+        <div class="flow-card group relative rounded-lg border border-slate-800/60 bg-slate-900/30 backdrop-blur px-3 py-2 text-[11px] text-slate-300 shadow-md">
+          <div class="absolute inset-0 -z-10 bg-gradient-to-r from-fuchsia-500/10 via-cyan-500/10 to-emerald-500/10 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <span class="text-slate-400">开发：</span>
+              <a href="https://github.com/CQUPT-CZL" target="_blank" rel="noopener noreferrer" class="flow-text font-medium underline underline-offset-2 decoration-slate-600 hover:decoration-cyan-400">CQUPT-CZL</a>
+              <span class="text-slate-500"> · 项目仓库：</span>
+              <a href="https://github.com/CQUPT-CZL/nexus-agent" target="_blank" rel="noopener noreferrer" class="flow-text font-medium underline underline-offset-2 decoration-slate-600 hover:decoration-emerald-400">nexus-agent</a>
+              <span class="text-slate-500 hidden sm:inline"> · 欢迎 Fork</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-slate-500 text-[10px]">v1.0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
@@ -280,10 +361,22 @@
                     <nav className="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/60">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                             <div className="flex items-center justify-between h-16">
+                            <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20 ring-1 ring-white/10 text-white"><Icons.Database /></div>
                                 <div className="flex items-center gap-3">
-                                    <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20 ring-1 ring-white/10 text-white"><Icons.Database /></div>
-                                    <div><h1 className="text-lg font-bold text-white tracking-tight leading-tight">Nexus Monitor</h1><div className="text-[10px] font-medium text-slate-500 uppercase tracking-widest">GPU Cluster Manager</div></div>
+                                    <div>
+                                        <h1 className="text-lg font-bold text-white tracking-tight leading-tight">Nexus Monitor</h1>
+                                        <div className="text-[10px] font-medium text-slate-500 uppercase tracking-widest">GPU Cluster Manager</div>
+                                    </div>
+                                    <div className="hidden md:flex items-center gap-2 pl-3 border-l border-slate-800/60">
+                                        <span className="relative flex h-2 w-2">
+                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                        </span>
+                                        <span className="flow-text font-bold tracking-wider text-sm"></span>
+                                    </div>
                                 </div>
+                            </div>
                                 <div className="flex items-center gap-4">
                                     <div className="hidden sm:flex items-center gap-6 text-xs font-medium text-slate-400 mr-4">
                                         <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>{activeCount} / {servers.length} Nodes Online</div>
@@ -329,6 +422,38 @@
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
+    </script>
+    <script>
+        (function(){
+            var c = document.getElementById('matrix-bg');
+            if(!c) return;
+            var ctx = c.getContext('2d');
+            var fontSize = 14;
+            var w, h, columns, drops;
+            var chars = '01ABCDEFGHIJKLMNOPQRSTUVWXYZ#$%&*+-/<>';
+            function setSize(){
+                w = c.width = window.innerWidth;
+                h = c.height = window.innerHeight;
+                columns = Math.floor(w / fontSize);
+                drops = new Array(columns).fill(0);
+            }
+            function draw(){
+                ctx.fillStyle = 'rgba(2,6,23,0.08)';
+                ctx.fillRect(0, 0, w, h);
+                ctx.fillStyle = 'rgba(16,185,129,0.75)';
+                ctx.font = fontSize + 'px monospace';
+                for(var i = 0; i < drops.length; i++){
+                    var text = chars[Math.floor(Math.random() * chars.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if(drops[i] * fontSize > h && Math.random() > 0.975){ drops[i] = 0; }
+                    drops[i] += 1;
+                }
+                requestAnimationFrame(draw);
+            }
+            setSize();
+            window.addEventListener('resize', setSize);
+            draw();
+        })();
     </script>
 </body>
 </html>
