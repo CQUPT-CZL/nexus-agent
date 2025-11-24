@@ -3,6 +3,7 @@ import socketserver
 import json
 import os
 import sys
+from datetime import datetime
 
 # 配置端口
 PORT = 3000
@@ -30,17 +31,20 @@ class ConfigHandler(http.server.SimpleHTTPRequestHandler):
     def do_POST(self):
         # 如果请求是保存配置
         if self.path == '/api/config':
-            content_length = int(self.headers['Content-Length'])
+            pin = self.headers.get('X-PIN')
+            if pin != datetime.now().strftime('%m%d'):
+                self.send_response(403)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(b'{"error":"invalid_pin"}')
+                print("❌ Invalid PIN")
+                return
+            content_length = int(self.headers.get('Content-Length') or 0)
             post_data = self.rfile.read(content_length)
-            
             try:
-                # 验证 JSON 格式
                 data = json.loads(post_data.decode('utf-8'))
-                
-                # 写入本地文件
                 with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
                     json.dump(data, f, indent=2, ensure_ascii=False)
-                
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
@@ -48,7 +52,9 @@ class ConfigHandler(http.server.SimpleHTTPRequestHandler):
                 print(f"✅ Configuration saved to {CONFIG_FILE}")
             except Exception as e:
                 self.send_response(500)
+                self.send_header('Content-type', 'application/json')
                 self.end_headers()
+                self.wfile.write(b'{"error":"server_error"}')
                 print(f"❌ Error saving config: {e}")
             return
 

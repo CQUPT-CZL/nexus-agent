@@ -137,6 +137,15 @@
             if (temp < 80) return "text-amber-400";
             return "text-rose-400";
         };
+        const getTodayPin = () => {
+            const d = new Date();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            return mm + dd;
+        };
+        const validatePin = (pin) => {
+            return typeof pin === 'string' && /^\d{4}$/.test(pin) && pin === getTodayPin();
+        };
 
         // --- Components ---
         const ProgressBar = ({ percent, colorClass }) => (
@@ -243,7 +252,7 @@
         const App = () => {
             const [servers, setServers] = useState([]);
             const [isModalOpen, setIsModalOpen] = useState(false);
-            const [modalData, setModalData] = useState({ name: "", url: "http://" });
+            const [modalData, setModalData] = useState({ name: "", url: "http://", pin: "" });
             const historyRef = useRef({});
 
             // 1. 初始化：尝试读取配置，如果失败（如预览环境）则使用本地存储
@@ -274,7 +283,7 @@
             }, []);
 
             // 2. 保存配置：优先尝试后端，失败则存本地
-            const saveConfig = async (newServersList) => {
+            const saveConfig = async (newServersList, pin) => {
                 const configToSave = newServersList.map(s => ({
                     id: s.id,
                     name: s.name,
@@ -286,14 +295,17 @@
                     // 注意：在预览环境 fetch('/api/config') 会直接抛出 TypeError
                     const res = await fetch('/api/config', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 'Content-Type': 'application/json', 'X-PIN': pin || '' },
                         body: JSON.stringify(configToSave)
                     });
-                    if (!res.ok) throw new Error("Backend save failed");
+                    if (res.ok) return true;
+                    if (res.status === 403) return false;
+                    throw new Error("Backend save failed");
                 } catch (err) {
                     console.warn("后端保存失败，降级保存到 LocalStorage:", err);
-                    // 降级保存到本地
+                    if (!validatePin(pin)) return false;
                     localStorage.setItem('nexus_servers_fallback', JSON.stringify(configToSave));
+                    return true;
                 }
             };
 
@@ -337,20 +349,25 @@
                 return () => clearInterval(interval);
             }, [servers.length]);
 
-            const addServer = () => {
+            const addServer = async () => {
                 const newServer = { id: Date.now(), name: modalData.name, url: modalData.url, status: 'pending' };
                 const newList = [...servers, newServer];
+                const ok = await saveConfig(newList, modalData.pin);
+                if (!ok) { alert('密码错误或保存失败'); return; }
                 setServers(newList);
-                saveConfig(newList);
+                location.reload();
                 setIsModalOpen(false);
-                setModalData({name: "", url: "http://"});
+                setModalData({name: "", url: "http://", pin: ""});
             };
 
-            const deleteServer = (id) => {
+            const deleteServer = async (id) => {
                 if(!confirm("确定删除该节点吗？")) return;
+                const pin = prompt("请输入密码");
+                if (!pin) return;
                 const newList = servers.filter(x => x.id !== id);
+                const ok = await saveConfig(newList, pin);
+                if (!ok) { alert('密码错误或保存失败'); return; }
                 setServers(newList);
-                saveConfig(newList);
             };
 
             const activeCount = servers.filter(s => s.status === 'online').length;
@@ -411,6 +428,7 @@
                                 <div className="space-y-4">
                                     <div><label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">名称</label><input type="text" className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-white outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ubuntu 3090 Cluster" value={modalData.name} onChange={e => setModalData({...modalData, name: e.target.value})} /></div>
                                     <div><label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">URL</label><input type="text" className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-white outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm" placeholder="http://192.168.1.10:8005" value={modalData.url} onChange={e => setModalData({...modalData, url: e.target.value})} /></div>
+                                    <div><label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">请输入密码</label><input type="text" inputMode="numeric" maxLength={4} className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-white outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm" placeholder="" value={modalData.pin} onChange={e => setModalData({...modalData, pin: e.target.value.replace(/\D/g,'')})} /></div>
                                 </div>
                                 <div className="flex gap-3 pt-2"><button onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-2.5 text-sm font-medium text-slate-400 bg-slate-800 hover:bg-slate-700 rounded-lg">取消</button><button onClick={addServer} className="flex-1 px-4 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-lg shadow-lg">连接</button></div>
                             </div>
