@@ -4,65 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nexus Monitor</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
+        /* 浅色滚动条 */
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
-        body { background-color: #020617; color: #e2e8f0; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        body { background-color: #f8fafc; color: #0f172a; }
+
+        /* 动画保持不变，但颜色调整 */
         @keyframes moveGradient {
             0% { background-position: 0% 50%; }
             100% { background-position: 200% 50%; }
         }
-        .neon-line {
-            background-image: linear-gradient(90deg, #f0abfc33, #22d3ee33, #34d39933, #22d3ee33, #f0abfc33);
-            background-size: 200% 100%;
-            box-shadow: 0 0 12px rgba(59,130,246,0.12);
-            animation: moveGradient 10s linear infinite;
-        }
-        @keyframes sweep {
-            0% { transform: translateX(-40%) skewX(-15deg); }
-            100% { transform: translateX(140%) skewX(-15deg); }
-        }
-        .flow-card::after {
-            content: '';
-            position: absolute;
-            top: 0; left: -40%;
-            width: 40%; height: 100%;
-            background: linear-gradient(115deg, rgba(99,102,241,0), rgba(99,102,241,0.25), rgba(34,197,94,0.15), rgba(99,102,241,0));
-            opacity: 0;
-            transition: opacity .3s ease;
-            pointer-events: none;
-            animation: sweep 8s linear infinite;
-        }
-        .flow-card:hover::after { opacity: 1; }
-        .flow-card {
-            position: relative;
-            overflow: hidden;
-        }
-        .flow-text {
-            background-image: linear-gradient(90deg, #34d399, #22d3ee, #6366f1, #22d3ee, #34d399);
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            animation: moveGradient 6s linear infinite;
-        }
-        .hacker-bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+        
+        /* 背景层样式调整为浅色 */
+        .hacker-bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; background: #f8fafc; }
         .hacker-bg > * { position: absolute; inset: 0; }
-        #matrix-bg { width: 100%; height: 100%; }
+        #matrix-bg { width: 100%; height: 100%; opacity: 0.6; }
+        
         .bg-grid {
-            background-image: radial-gradient(circle at 0 0, rgba(34,197,94,0.12) 0, rgba(34,197,94,0) 40%), radial-gradient(circle at 100% 100%, rgba(56,189,248,0.10) 0, rgba(56,189,248,0) 40%), repeating-linear-gradient(0deg, rgba(148,163,184,0.08) 0px, rgba(148,163,184,0.08) 1px, transparent 1px, transparent 48px), repeating-linear-gradient(90deg, rgba(148,163,184,0.06) 0px, rgba(148,163,184,0.06) 1px, transparent 1px, transparent 48px);
-            opacity: 0.35;
-            filter: saturate(120%);
-            animation: gridMove 40s linear infinite;
+            background-image: 
+                radial-gradient(circle at 0 0, rgba(59, 130, 246, 0.05) 0, transparent 40%), 
+                radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.05) 0, transparent 40%), 
+                repeating-linear-gradient(0deg, rgba(203, 213, 225, 0.4) 0px, rgba(203, 213, 225, 0.4) 1px, transparent 1px, transparent 48px), 
+                repeating-linear-gradient(90deg, rgba(203, 213, 225, 0.4) 0px, rgba(203, 213, 225, 0.4) 1px, transparent 1px, transparent 48px);
+            opacity: 0.6;
         }
-        @keyframes gridMove { to { background-position: 0 200px, 0 -200px, 0 200px, 200px 0; } }
-        .bg-scanlines { background-image: repeating-linear-gradient(0deg, rgba(2,6,23,0) 0px, rgba(2,6,23,0) 3px, rgba(94,234,212,0.05) 4px, rgba(2,6,23,0) 5px); mix-blend-mode: soft-light; opacity: 0.35; }
-        .bg-glow { background: radial-gradient(45% 60% at 60% 10%, rgba(99,102,241,0.12), rgba(99,102,241,0)), radial-gradient(30% 50% at 0% 100%, rgba(16,185,129,0.10), rgba(16,185,129,0)); filter: blur(60px); opacity: 0.5; }
+        
         #root { position: relative; z-index: 10; }
     </style>
 </head>
@@ -70,40 +45,16 @@
     <div class="hacker-bg">
         <canvas id="matrix-bg"></canvas>
         <div class="bg-grid"></div>
-        <div class="bg-scanlines"></div>
-        <div class="bg-glow"></div>
     </div>
     <div id="root"></div>
-    <footer class="mt-3">
-      <div class="mx-auto max-w-3xl px-3">
-        <div class="neon-line h-px w-full mb-2"></div>
-        <div class="flow-card group relative rounded-lg border border-slate-800/60 bg-slate-900/30 backdrop-blur px-3 py-2 text-[11px] text-slate-300 shadow-md">
-          <div class="absolute inset-0 -z-10 bg-gradient-to-r from-fuchsia-500/10 via-cyan-500/10 to-emerald-500/10 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span class="relative flex h-2 w-2">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-              </span>
-              <span class="text-slate-400">开发：</span>
-              <a href="https://github.com/CQUPT-CZL" target="_blank" rel="noopener noreferrer" class="flow-text font-medium underline underline-offset-2 decoration-slate-600 hover:decoration-cyan-400">CQUPT-CZL</a>
-              <span class="text-slate-500"> · 项目仓库：</span>
-              <a href="https://github.com/CQUPT-CZL/nexus-agent" target="_blank" rel="noopener noreferrer" class="flow-text font-medium underline underline-offset-2 decoration-slate-600 hover:decoration-emerald-400">nexus-agent</a>
-              <span class="text-slate-500 hidden sm:inline"> · 欢迎 Fork</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="text-slate-500 text-[10px]">v1.0</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </footer>
+
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // --- Icons ---
+        // --- Icons (无需修改) ---
         const Icons = {
             Github: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>,
+            Beaker: () => <img src="public/favicon.svg" alt="Beaker Icon" width="24" height="24" />,
             Server: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>,
             Activity: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>,
             Cpu: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>,
@@ -118,10 +69,11 @@
             Terminal: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>,
             Clock: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
             X: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>,
-            AlertTriangle: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            AlertTriangle: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>,
+            User: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         };
 
-        // --- Helpers ---
+        // --- Helpers (保持不变) ---
         const formatSpeed = (mbPerSec) => {
             if (mbPerSec < 0.1) return '0 KB/s';
             if (mbPerSec < 1) return `${(mbPerSec * 1024).toFixed(0)} KB/s`;
@@ -133,9 +85,9 @@
             return "bg-rose-500";
         };
         const getTempColor = (temp) => {
-            if (temp < 60) return "text-emerald-400";
-            if (temp < 80) return "text-amber-400";
-            return "text-rose-400";
+            if (temp < 60) return "text-emerald-600";
+            if (temp < 80) return "text-amber-600";
+            return "text-rose-600";
         };
         const getTodayPin = () => {
             const d = new Date();
@@ -149,34 +101,59 @@
 
         // --- Components ---
         const ProgressBar = ({ percent, colorClass }) => (
-            <div className="w-full bg-slate-700/50 rounded-full h-1.5 overflow-hidden">
-                <div className={`${colorClass || getLoadColor(percent)} h-full rounded-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(0,0,0,0.3)]`} style={{ width: `${Math.max(0, Math.min(100, percent))}%` }} />
+            // 轨道颜色改为浅灰 slate-200
+            <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                <div className={`${colorClass || getLoadColor(percent)} h-full rounded-full transition-all duration-500 ease-out`} style={{ width: `${Math.max(0, Math.min(100, percent))}%` }} />
             </div>
         );
 
         const GpuCard = ({ gpu, index }) => {
             const cleanName = gpu.name.replace("NVIDIA GeForce ", "").replace("NVIDIA ", "").replace("RTX ", "");
+            const hasProcesses = gpu.processes && gpu.processes.length > 0;
             return (
-                <div className="bg-slate-950/50 border border-slate-800 rounded-lg p-3 hover:border-slate-700 transition-colors group">
+                // 卡片背景改为白色，边框浅灰
+                <div className="bg-white border border-slate-200 rounded-lg p-3 hover:border-blue-400 hover:shadow-md transition-all group">
                     <div className="flex justify-between items-center mb-3">
                         <div className="flex items-center gap-2.5">
-                            <div className="w-5 h-5 rounded bg-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-400 border border-slate-700">{index}</div>
-                            <span className="text-xs font-bold text-white group-hover:text-blue-400 transition-colors truncate max-w-[140px]" title={gpu.name}>{cleanName}</span>
+                            {/* 索引块背景改为浅灰 */}
+                            <div className="w-5 h-5 rounded bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500 border border-slate-200">{index}</div>
+                            {/* 文字改为深色 */}
+                            <span className="text-xs font-bold text-slate-800 group-hover:text-blue-600 transition-colors truncate max-w-[140px]" title={gpu.name}>{cleanName}</span>
                         </div>
-                        <div className={`flex items-center gap-1 text-xs font-bold font-mono ${getTempColor(gpu.temperature)} bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800`}>
+                        <div className={`flex items-center gap-1 text-xs font-bold font-mono ${getTempColor(gpu.temperature)} bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200`}>
                             <Icons.Thermometer /> {gpu.temperature}°C
                         </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-4 mb-2">
                         <div className="space-y-1">
-                            <div className="flex justify-between text-[10px] font-medium text-slate-500"><span>Core</span><span className={gpu.utilization > 90 ? 'text-rose-400' : 'text-slate-300'}>{gpu.utilization}%</span></div>
+                            <div className="flex justify-between text-[10px] font-medium text-slate-500"><span>Core</span><span className={gpu.utilization > 90 ? 'text-rose-500' : 'text-slate-700'}>{gpu.utilization}%</span></div>
                             <ProgressBar percent={gpu.utilization} />
                         </div>
                         <div className="space-y-1">
-                            <div className="flex justify-between text-[10px] font-medium text-slate-500"><span>VRAM</span><span className="text-slate-300">{gpu.memory_used}G</span></div>
+                            <div className="flex justify-between text-[10px] font-medium text-slate-500"><span>VRAM</span><span className="text-slate-700">{gpu.memory_used}G</span></div>
                             <ProgressBar percent={gpu.memory_utilization} colorClass="bg-indigo-500" />
                         </div>
                     </div>
+                    {/* 进程列表 */}
+                    {hasProcesses && (
+                        <div className="mt-3 pt-2 border-t border-slate-100">
+                            <div className="flex items-center gap-1 mb-1.5">
+                                <Icons.User />
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active Users</span>
+                            </div>
+                            <div className="space-y-1">
+                                {gpu.processes.map((proc, idx) => (
+                                    <div key={idx} className="flex justify-between items-center bg-slate-50 rounded px-2 py-1 text-[10px] border border-slate-100">
+                                        <div className="flex items-center gap-2 overflow-hidden">
+                                            <span className="text-emerald-600 font-bold truncate max-w-[60px]" title={`User: ${proc.username}`}>{proc.username}</span>
+                                            <span className="text-slate-500 truncate max-w-[80px]" title={`PID: ${proc.pid} | CMD: ${proc.command}`}>{proc.command}</span>
+                                        </div>
+                                        <span className="text-slate-400 font-mono whitespace-nowrap">{Math.round(proc.gpu_memory_usage)}MB</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         };
@@ -189,14 +166,15 @@
             const simpleCpu = data.cpu_model ? data.cpu_model.replace(/Intel\(R\) |Xeon\(R\) |CPU |@ [\d.]+GHz/g, "").trim() : "Unknown CPU";
 
             return (
-                <div className={`relative flex flex-col h-full bg-slate-900 border ${isOffline ? 'border-rose-900/30 bg-rose-950/5' : 'border-slate-800'} rounded-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-black/50 hover:-translate-y-1`}>
-                    <div className={`p-4 border-b ${isOffline ? 'border-rose-900/30 bg-rose-900/10' : 'border-slate-800 bg-slate-800/40'} flex justify-between items-start backdrop-blur-md`}>
+                // 主卡片样式：白底，浅边框，阴影
+                <div className={`relative flex flex-col h-full bg-white border ${isOffline ? 'border-rose-200 bg-rose-50' : 'border-slate-200'} rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1`}>
+                    <div className={`p-4 border-b ${isOffline ? 'border-rose-100 bg-rose-50' : 'border-slate-100 bg-slate-50/80'} flex justify-between items-start backdrop-blur-md`}>
                         <div className="overflow-hidden pr-2">
                             <div className="flex items-center gap-2 mb-1">
-                                <h3 className="text-base font-bold text-white tracking-tight truncate">{server.name}</h3>
+                                <h3 className="text-base font-bold text-slate-800 tracking-tight truncate">{server.name}</h3>
                                 {isOffline ? 
-                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20 flex items-center gap-1"><Icons.AlertTriangle /> OFFLINE</span> : 
-                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1"><Icons.Activity /> ONLINE</span>
+                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-600 border border-rose-200 flex items-center gap-1"><Icons.AlertTriangle /> OFFLINE</span> : 
+                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-600 border border-emerald-200 flex items-center gap-1"><Icons.Activity /> ONLINE</span>
                                 }
                             </div>
                             <div className="text-[10px] font-mono text-slate-500 flex items-center gap-2 truncate">
@@ -204,42 +182,43 @@
                                 {data.uptime_seconds && <span className="flex items-center gap-1"><Icons.Clock /> {(data.uptime_seconds / 86400).toFixed(1)}d</span>}
                             </div>
                         </div>
-                        <button onClick={() => onDelete(server.id)} className="p-1.5 text-slate-600 hover:text-rose-400 hover:bg-rose-500/10 rounded-md transition-colors"><Icons.Trash2 /></button>
+                        <button onClick={() => onDelete(server.id)} className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-100 rounded-md transition-colors"><Icons.Trash2 /></button>
                     </div>
 
                     <div className="flex-1 flex flex-col">
                         {isOffline ? (
-                            <div className="flex-1 flex flex-col items-center justify-center p-8 text-slate-600 min-h-[200px]">
+                            <div className="flex-1 flex flex-col items-center justify-center p-8 text-slate-400 min-h-[200px]">
                                 <div className="relative mb-3"><Icons.Wifi /><div className="absolute -bottom-1 -right-1 text-rose-500"><Icons.X /></div></div>
                                 <p className="text-sm font-medium text-slate-500">连接断开</p>
                             </div>
                         ) : (
                             <>
-                                <div className="grid grid-cols-3 border-b border-slate-800 divide-x divide-slate-800 bg-slate-950/30 text-center py-3">
+                                {/* 仪表区域背景调整 */}
+                                <div className="grid grid-cols-3 border-b border-slate-100 divide-x divide-slate-100 bg-slate-50/50 text-center py-3">
                                     <div className="px-2 group">
-                                        <div className="text-[10px] uppercase text-slate-500 mb-1 font-bold flex items-center justify-center gap-1"><Icons.Cpu /> CPU</div>
-                                        <div className="text-sm font-bold text-white group-hover:text-blue-400 transition-colors">{data.cpu_usage}%</div>
-                                        <div className="text-[10px] text-slate-600 truncate max-w-full px-1" title={data.cpu_model}>{simpleCpu}</div>
+                                        <div className="text-[10px] uppercase text-slate-400 mb-1 font-bold flex items-center justify-center gap-1"><Icons.Cpu /> CPU</div>
+                                        <div className="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors">{data.cpu_usage}%</div>
+                                        <div className="text-[10px] text-slate-500 truncate max-w-full px-1" title={data.cpu_model}>{simpleCpu}</div>
                                     </div>
                                     <div className="px-2 group">
-                                        <div className="text-[10px] uppercase text-slate-500 mb-1 font-bold flex items-center justify-center gap-1"><Icons.HardDrive /> RAM</div>
-                                        <div className="text-sm font-bold text-white group-hover:text-purple-400 transition-colors">{data.ram_percent}%</div>
-                                        <div className="text-[10px] text-slate-600">{data.ram_used}G / {data.ram_total}G</div>
+                                        <div className="text-[10px] uppercase text-slate-400 mb-1 font-bold flex items-center justify-center gap-1"><Icons.HardDrive /> RAM</div>
+                                        <div className="text-sm font-bold text-slate-800 group-hover:text-purple-600 transition-colors">{data.ram_percent}%</div>
+                                        <div className="text-[10px] text-slate-500">{data.ram_used}G / {data.ram_total}G</div>
                                     </div>
                                     <div className="px-2">
-                                        <div className="text-[10px] uppercase text-slate-500 mb-1 font-bold flex items-center justify-center gap-1"><Icons.Network /> NET</div>
+                                        <div className="text-[10px] uppercase text-slate-400 mb-1 font-bold flex items-center justify-center gap-1"><Icons.Network /> NET</div>
                                         <div className="flex flex-col items-center justify-center h-[34px]">
-                                            <div className="text-[10px] font-mono text-emerald-500 leading-none mb-1">↑ {formatSpeed(metrics.upSpeed)}</div>
-                                            <div className="text-[10px] font-mono text-blue-500 leading-none">↓ {formatSpeed(metrics.downSpeed)}</div>
+                                            <div className="text-[10px] font-mono text-emerald-600 leading-none mb-1">↑ {formatSpeed(metrics.upSpeed)}</div>
+                                            <div className="text-[10px] font-mono text-blue-600 leading-none">↓ {formatSpeed(metrics.downSpeed)}</div>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="p-4 flex-1 bg-slate-900/20">
+                                <div className="p-4 flex-1 bg-slate-50/30">
                                     <div className="flex items-center justify-between mb-3">
-                                        <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5"><Icons.Zap /> Accelerators <span className="bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded-full">{gpuCount}</span></h4>
+                                        <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5"><Icons.Zap /> Accelerators <span className="bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-full">{gpuCount}</span></h4>
                                     </div>
                                     <div className="space-y-2 max-h-[280px] overflow-y-auto custom-scrollbar pr-1">
-                                        {!data.gpus || data.gpus.length === 0 ? <div className="text-center py-8 text-slate-600 text-xs border border-dashed border-slate-800 rounded-lg">无 GPU 设备检测到</div> : data.gpus.map((gpu, idx) => <GpuCard key={idx} index={idx} gpu={gpu} />)}
+                                        {!data.gpus || data.gpus.length === 0 ? <div className="text-center py-8 text-slate-400 text-xs border border-dashed border-slate-300 rounded-lg">无 GPU 设备检测到</div> : data.gpus.map((gpu, idx) => <GpuCard key={idx} index={idx} gpu={gpu} />)}
                                     </div>
                                 </div>
                             </>
@@ -255,74 +234,65 @@
             const [modalData, setModalData] = useState({ name: "", url: "http://", pin: "" });
             const historyRef = useRef({});
 
-            // 1. 初始化：尝试读取配置，如果失败（如预览环境）则使用本地存储
             useEffect(() => {
                 const loadConfig = async () => {
                     try {
-                        // 尝试请求后端API，这里加一个try-catch捕获URL解析错误（blob环境下fetch相对路径会崩）
-                        let data = [];
-                        try {
-                            const res = await fetch('/api/config');
-                            if (res.ok) {
-                                data = await res.json();
-                            } else {
-                                throw new Error("Backend not reachable");
-                            }
-                        } catch (fetchErr) {
-                            console.warn("无法连接 Python 后端或处于预览模式，切换至 LocalStorage 模式:", fetchErr);
-                            const saved = localStorage.getItem('nexus_servers_fallback');
-                            if (saved) data = JSON.parse(saved);
+                        const res = await fetch('/api/config');
+                        if (res.ok) {
+                            const data = await res.json();
+                            setServers(data.map(s => ({...s, status: 'pending', data: null, metrics: null})));
+                        } else {
+                            throw new Error("API not found");
                         }
-                        
-                        setServers(data.map(s => ({...s, status: 'pending', data: null, metrics: null})));
                     } catch (err) {
-                        console.error("Config load failed completely:", err);
+                        console.warn("API加载失败，降级Localstorage");
+                        const saved = localStorage.getItem('nexus_servers_fallback');
+                        if (saved) setServers(JSON.parse(saved).map(s => ({...s, status: 'pending', data: null, metrics: null})));
                     }
                 };
                 loadConfig();
             }, []);
 
-            // 2. 保存配置：优先尝试后端，失败则存本地
             const saveConfig = async (newServersList, pin) => {
                 const configToSave = newServersList.map(s => ({
-                    id: s.id,
-                    name: s.name,
-                    url: s.url
+                    id: s.id, name: s.name, url: s.url
                 }));
-
                 try {
-                    // 尝试发送给后端
-                    // 注意：在预览环境 fetch('/api/config') 会直接抛出 TypeError
                     const res = await fetch('/api/config', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'X-PIN': pin || '' },
                         body: JSON.stringify(configToSave)
                     });
                     if (res.ok) return true;
-                    if (res.status === 403) return false;
+                    if (res.status === 403 || res.status === 401) return false;
                     throw new Error("Backend save failed");
                 } catch (err) {
-                    console.warn("后端保存失败，降级保存到 LocalStorage:", err);
+                    console.warn("后端不可用，本地保存:", err);
                     if (!validatePin(pin)) return false;
                     localStorage.setItem('nexus_servers_fallback', JSON.stringify(configToSave));
                     return true;
                 }
             };
 
-            // 3. 轮询获取数据
             useEffect(() => {
                 if (servers.length === 0) return;
-
                 const fetchAll = async () => {
                     const promises = servers.map(async (server) => {
                         try {
                             const controller = new AbortController();
                             const timeoutId = setTimeout(() => controller.abort(), 3000);
-                            const res = await fetch(`${server.url}/metrics`, { signal: controller.signal });
+                            const targetUrl = `${server.url}/metrics`;
+                            const proxyUrl = `/api/proxy?url=${encodeURIComponent(targetUrl)}`;
+                            let res;
+                            try {
+                                res = await fetch(proxyUrl, { signal: controller.signal });
+                                if (res.status !== 200) throw new Error("Proxy failed");
+                            } catch (proxyErr) {
+                                res = await fetch(targetUrl, { signal: controller.signal });
+                            }
                             clearTimeout(timeoutId);
                             if (!res.ok) throw new Error("Err");
                             const jsonData = await res.json();
-
                             const currentTime = Date.now();
                             const history = historyRef.current[server.url];
                             let upSpeed = 0, downSpeed = 0;
@@ -339,11 +309,9 @@
                             return { ...server, status: 'offline' };
                         }
                     });
-                    
                     const results = await Promise.all(promises);
                     setServers(results);
                 };
-
                 fetchAll();
                 const interval = setInterval(fetchAll, 2000);
                 return () => clearInterval(interval);
@@ -353,16 +321,15 @@
                 const newServer = { id: Date.now(), name: modalData.name, url: modalData.url, status: 'pending' };
                 const newList = [...servers, newServer];
                 const ok = await saveConfig(newList, modalData.pin);
-                if (!ok) { alert('密码错误或保存失败'); return; }
+                if (!ok) { alert('密码错误或保存失败 (PIN应为今日日期MMDD)'); return; }
                 setServers(newList);
-                location.reload();
                 setIsModalOpen(false);
                 setModalData({name: "", url: "http://", pin: ""});
             };
 
             const deleteServer = async (id) => {
                 if(!confirm("确定删除该节点吗？")) return;
-                const pin = prompt("请输入密码");
+                const pin = prompt("请输入管理密码 (PIN: MMDD)");
                 if (!pin) return;
                 const newList = servers.filter(x => x.id !== id);
                 const ok = await saveConfig(newList, pin);
@@ -375,34 +342,31 @@
 
             return (
                 <div className="min-h-screen pb-20">
-                    <nav className="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/60">
+                    {/* 顶部导航：改为白底，浅边框 */}
+                    <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                             <div className="flex items-center justify-between h-16">
                             <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20 ring-1 ring-white/10 text-white"><Icons.Database /></div>
+                                <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20 text-white"><Icons.Database /></div>
                                 <div className="flex items-center gap-3">
                                     <div>
-                                        <h1 className="text-lg font-bold text-white tracking-tight leading-tight">Nexus Monitor</h1>
+                                        <h1 className="text-lg font-bold text-slate-800 tracking-tight leading-tight">Nexus Monitor</h1>
                                         <div className="text-[10px] font-medium text-slate-500 uppercase tracking-widest">GPU Cluster Manager</div>
-                                    </div>
-                                    <div className="hidden md:flex items-center gap-2 pl-3 border-l border-slate-800/60">
-                                        <span className="relative flex h-2 w-2">
-                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                                        </span>
-                                        <span className="flow-text font-bold tracking-wider text-sm"></span>
                                     </div>
                                 </div>
                             </div>
                                 <div className="flex items-center gap-4">
-                                    <div className="hidden sm:flex items-center gap-6 text-xs font-medium text-slate-400 mr-4">
+                                    <div className="hidden sm:flex items-center gap-6 text-xs font-medium text-slate-500 mr-4">
                                         <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>{activeCount} / {servers.length} Nodes Online</div>
-                                        <div className="flex items-center gap-1.5"><span className="text-yellow-500"><Icons.Zap /></span>{totalGpus} GPUs Active</div>
+                                        <div className="flex items-center gap-1.5"><span className="text-amber-500"><Icons.Zap /></span>{totalGpus} GPUs Active</div>
                                     </div>
-                                    <a href="https://github.com/CQUPT-CZL/nexus-agent" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors p-2 hover:bg-slate-800 rounded-lg" title="View on GitHub">
+                                    <a href="http://meeting.cuizl.cn/" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-slate-700 transition-colors p-2 hover:bg-slate-100 rounded-lg" title="Lab Meeting Lite">
+                                        <Icons.Beaker />
+                                    </a>
+                                    <a href="https://github.com/CQUPT-CZL/nexus-agent" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-slate-700 transition-colors p-2 hover:bg-slate-100 rounded-lg" title="View on GitHub">
                                         <Icons.Github />
                                     </a>
-                                    <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-lg shadow-blue-500/20 active:translate-y-0.5"><Icons.Plus /> Add Node</button>
+                                    <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-md shadow-blue-500/20 active:translate-y-0.5"><Icons.Plus /> Add Node</button>
                                 </div>
                             </div>
                         </div>
@@ -410,11 +374,11 @@
 
                     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                         {servers.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-32 border-2 border-dashed border-slate-800 rounded-3xl bg-slate-900/20">
-                                <div className="p-6 bg-slate-800 rounded-full mb-6 shadow-xl shadow-black/50 text-slate-500"><Icons.Server /></div>
-                                <h2 className="text-2xl font-bold text-white mb-2">暂无监控节点</h2>
+                            <div className="flex flex-col items-center justify-center py-32 border-2 border-dashed border-slate-300 rounded-3xl bg-white/50">
+                                <div className="p-6 bg-slate-100 rounded-full mb-6 text-slate-400"><Icons.Server /></div>
+                                <h2 className="text-2xl font-bold text-slate-800 mb-2">暂无监控节点</h2>
                                 <p className="text-slate-500 mb-8 text-center max-w-md">您的仪表盘空空如也。请点击下方按钮添加 Agent 连接。</p>
-                                <button onClick={() => setIsModalOpen(true)} className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl font-bold shadow-xl shadow-blue-600/20 transition-all hover:scale-105">添加第一台服务器</button>
+                                <button onClick={() => setIsModalOpen(true)} className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-bold shadow-lg shadow-blue-600/20 transition-all hover:scale-105">添加第一台服务器</button>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">{servers.map(s => <ServerCard key={s.id} server={s} onDelete={deleteServer} />)}</div>
@@ -422,15 +386,16 @@
                     </main>
 
                     {isModalOpen && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-                            <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl p-6 space-y-5">
-                                <div className="flex justify-between items-center border-b border-slate-800 pb-4"><h3 className="text-xl font-bold text-white flex items-center gap-2"><span className="text-blue-500"><Icons.Server /></span> 添加新节点</h3><button onClick={() => setIsModalOpen(false)} className="text-slate-500 hover:text-white"><Icons.X /></button></div>
+                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+                            {/* 弹窗：白底 */}
+                            <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-md shadow-2xl p-6 space-y-5">
+                                <div className="flex justify-between items-center border-b border-slate-100 pb-4"><h3 className="text-xl font-bold text-slate-800 flex items-center gap-2"><span className="text-blue-600"><Icons.Server /></span> 添加新节点</h3><button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-700"><Icons.X /></button></div>
                                 <div className="space-y-4">
-                                    <div><label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">名称</label><input type="text" className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-white outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ubuntu 3090 Cluster" value={modalData.name} onChange={e => setModalData({...modalData, name: e.target.value})} /></div>
-                                    <div><label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">URL</label><input type="text" className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-white outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm" placeholder="http://192.168.1.10:8005" value={modalData.url} onChange={e => setModalData({...modalData, url: e.target.value})} /></div>
-                                    <div><label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">请输入密码</label><input type="text" inputMode="numeric" maxLength={4} className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-white outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm" placeholder="" value={modalData.pin} onChange={e => setModalData({...modalData, pin: e.target.value.replace(/\D/g,'')})} /></div>
+                                    <div><label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">名称</label><input type="text" className="w-full bg-slate-50 border border-slate-300 rounded-lg px-4 py-3 text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all" placeholder="Ubuntu 3090 Cluster" value={modalData.name} onChange={e => setModalData({...modalData, name: e.target.value})} /></div>
+                                    <div><label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">URL</label><input type="text" className="w-full bg-slate-50 border border-slate-300 rounded-lg px-4 py-3 text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm transition-all" placeholder="http://192.168.1.10:8005" value={modalData.url} onChange={e => setModalData({...modalData, url: e.target.value})} /></div>
+                                    <div><label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">请输入密码</label><input type="text" inputMode="numeric" maxLength={4} className="w-full bg-slate-50 border border-slate-300 rounded-lg px-4 py-3 text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm transition-all" placeholder="" value={modalData.pin} onChange={e => setModalData({...modalData, pin: e.target.value.replace(/\D/g,'')})} /></div>
                                 </div>
-                                <div className="flex gap-3 pt-2"><button onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-2.5 text-sm font-medium text-slate-400 bg-slate-800 hover:bg-slate-700 rounded-lg">取消</button><button onClick={addServer} className="flex-1 px-4 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-lg shadow-lg">连接</button></div>
+                                <div className="flex gap-3 pt-2"><button onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-2.5 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">取消</button><button onClick={addServer} className="flex-1 px-4 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-lg shadow-lg transition-all">连接</button></div>
                             </div>
                         </div>
                     )}
@@ -456,9 +421,11 @@
                 drops = new Array(columns).fill(0);
             }
             function draw(){
-                ctx.fillStyle = 'rgba(2,6,23,0.08)';
+                // 白色背景的淡出效果
+                ctx.fillStyle = 'rgba(248,250,252,0.1)';
                 ctx.fillRect(0, 0, w, h);
-                ctx.fillStyle = 'rgba(16,185,129,0.75)';
+                // 文字颜色改为淡蓝灰色，适合浅色背景
+                ctx.fillStyle = 'rgba(148,163,184,0.4)'; 
                 ctx.font = fontSize + 'px monospace';
                 for(var i = 0; i < drops.length; i++){
                     var text = chars[Math.floor(Math.random() * chars.length)];
