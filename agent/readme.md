@@ -47,3 +47,23 @@ sudo systemctl start nexus-agent
 ```
 
 Your Nexus Agent should now be running and will automatically start every time the system boots.
+
+## 4. Restarting After Code Changes
+
+If you modify the Nexus Agent code and need to restart the service, use the following command:
+
+```bash
+sudo systemctl restart nexus-agent
+```
+
+This will gracefully restart the agent with your latest code changes.
+
+## 5. Checking Service Status
+
+To check the current status of the Nexus Agent service, use the following command:
+
+```bash
+sudo systemctl status nexus-agent
+```
+
+This will show you whether the service is running, any recent log output, and other status information.
