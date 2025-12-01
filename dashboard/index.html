@@ -10,7 +10,7 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
-        /* 浅色滚动条 */
+        /* 保持原有样式不变 */
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
@@ -18,13 +18,31 @@
         
         body { background-color: #f8fafc; color: #0f172a; }
 
-        /* 动画保持不变，但颜色调整 */
+        .ran-jie-text {
+            background: linear-gradient(90deg, #f87171, #fb923c, #facc15, #a3e635, #4ade80, #34d399, #22d3ee, #60a5fa, #a78bfa, #f472b6, #f87171);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            background-size: 200% auto;
+            animation: moveGradient 4s linear infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .ran-jie-icons {
+            display: inline-block;
+            animation: float 2.5s ease-in-out infinite;
+            padding-left: 0.25rem;
+        }
+
         @keyframes moveGradient {
             0% { background-position: 0% 50%; }
             100% { background-position: 200% 50%; }
         }
         
-        /* 背景层样式调整为浅色 */
         .hacker-bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; background: #f8fafc; }
         .hacker-bg > * { position: absolute; inset: 0; }
         #matrix-bg { width: 100%; height: 100%; opacity: 0.6; }
@@ -51,7 +69,7 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // --- Icons (无需修改) ---
+        // --- Icons (新增了 Wind 和 Bolt) ---
         const Icons = {
             Github: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>,
             Beaker: () => <img src="public/favicon.svg" alt="Beaker Icon" width="24" height="24" />,
@@ -70,14 +88,24 @@
             Clock: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
             X: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>,
             AlertTriangle: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>,
-            User: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            User: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+            Wind: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg>,
+            Bolt: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
         };
 
-        // --- Helpers (保持不变) ---
+        // --- Helpers ---
         const formatSpeed = (mbPerSec) => {
+            if (!mbPerSec) return '0 KB/s';
             if (mbPerSec < 0.1) return '0 KB/s';
             if (mbPerSec < 1) return `${(mbPerSec * 1024).toFixed(0)} KB/s`;
             return `${mbPerSec.toFixed(2)} MB/s`;
+        };
+        const formatTime = (d) => {
+            if (!d) return '';
+            const hh = String(d.getHours()).padStart(2, '0');
+            const mm = String(d.getMinutes()).padStart(2, '0');
+            const ss = String(d.getSeconds()).padStart(2, '0');
+            return `${hh}:${mm}:${ss}`;
         };
         const getLoadColor = (percent) => {
             if (percent < 50) return "bg-emerald-500";
@@ -101,54 +129,97 @@
 
         // --- Components ---
         const ProgressBar = ({ percent, colorClass }) => (
-            // 轨道颜色改为浅灰 slate-200
             <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
                 <div className={`${colorClass || getLoadColor(percent)} h-full rounded-full transition-all duration-500 ease-out`} style={{ width: `${Math.max(0, Math.min(100, percent))}%` }} />
             </div>
         );
 
-        const GpuCard = ({ gpu, index }) => {
+        const GpuCard = ({ gpu, index, allProcesses }) => {
             const cleanName = gpu.name.replace("NVIDIA GeForce ", "").replace("NVIDIA ", "").replace("RTX ", "");
-            const hasProcesses = gpu.processes && gpu.processes.length > 0;
+            
+            // 兼容性逻辑：新版后端将进程放在根节点，旧版可能在 gpu 节点内
+            // 我们过滤出 gpu_index 匹配当前显卡的进程
+            const gpuProcesses = allProcesses 
+                ? allProcesses.filter(p => p.gpu_index === index)
+                : (gpu.processes || []); // 回退到旧数据结构
+
+            const hasProcesses = gpuProcesses.length > 0;
+            
+            // 数据容错
+            const powerDraw = gpu.power_draw || 0;
+            const fanSpeed = gpu.fan_speed || 0;
+
             return (
-                // 卡片背景改为白色，边框浅灰
                 <div className="bg-white border border-slate-200 rounded-lg p-3 hover:border-blue-400 hover:shadow-md transition-all group">
                     <div className="flex justify-between items-center mb-3">
                         <div className="flex items-center gap-2.5">
-                            {/* 索引块背景改为浅灰 */}
                             <div className="w-5 h-5 rounded bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500 border border-slate-200">{index}</div>
-                            {/* 文字改为深色 */}
                             <span className="text-xs font-bold text-slate-800 group-hover:text-blue-600 transition-colors truncate max-w-[140px]" title={gpu.name}>{cleanName}</span>
                         </div>
-                        <div className={`flex items-center gap-1 text-xs font-bold font-mono ${getTempColor(gpu.temperature)} bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200`}>
-                            <Icons.Thermometer /> {gpu.temperature}°C
+                        {/* 顶部指示灯栏 */}
+                        <div className="flex items-center gap-2">
+                            {/* 风扇 */}
+                            {fanSpeed > 0 && (
+                                <div className="flex items-center gap-1 text-[10px] font-mono text-slate-400" title="Fan Speed">
+                                    <Icons.Wind /> {fanSpeed}%
+                                </div>
+                            )}
+                            {/* 温度 */}
+                            <div className={`flex items-center gap-1 text-xs font-bold font-mono ${getTempColor(gpu.temperature)} bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200`}>
+                                <Icons.Thermometer /> {gpu.temperature}°C
+                            </div>
                         </div>
                     </div>
+                    
                     <div className="grid grid-cols-2 gap-4 mb-2">
                         <div className="space-y-1">
-                            <div className="flex justify-between text-[10px] font-medium text-slate-500"><span>Core</span><span className={gpu.utilization > 90 ? 'text-rose-500' : 'text-slate-700'}>{gpu.utilization}%</span></div>
+                            <div className="flex justify-between text-[10px] font-medium text-slate-500">
+                                <span>Core</span>
+                                <span className={gpu.utilization > 90 ? 'text-rose-500' : 'text-slate-700'}>{gpu.utilization}%</span>
+                            </div>
                             <ProgressBar percent={gpu.utilization} />
                         </div>
                         <div className="space-y-1">
-                            <div className="flex justify-between text-[10px] font-medium text-slate-500"><span>VRAM</span><span className="text-slate-700">{gpu.memory_used}G</span></div>
+                            <div className="flex justify-between text-[10px] font-medium text-slate-500">
+                                <span>VRAM</span>
+                                <span className="text-slate-700">{gpu.memory_used}G</span>
+                            </div>
                             <ProgressBar percent={gpu.memory_utilization} colorClass="bg-indigo-500" />
                         </div>
                     </div>
+
+                    {/* 功率和显存详情行 */}
+                    <div className="flex justify-between items-center mt-2 text-[10px] text-slate-400 border-t border-slate-50 pt-1.5">
+                        <div className="flex items-center gap-1" title="Power Draw">
+                            <Icons.Bolt /> 
+                            <span className="font-mono">{powerDraw > 0 ? `${powerDraw}W` : 'N/A'}</span>
+                        </div>
+                         <div className="font-mono">{gpu.memory_used} / {gpu.memory_total} GB</div>
+                    </div>
+
                     {/* 进程列表 */}
                     {hasProcesses && (
-                        <div className="mt-3 pt-2 border-t border-slate-100">
+                        <div className="mt-2 pt-2 border-t border-slate-100">
                             <div className="flex items-center gap-1 mb-1.5">
                                 <Icons.User />
                                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active Users</span>
                             </div>
                             <div className="space-y-1">
-                                {gpu.processes.map((proc, idx) => (
+                                {gpuProcesses.map((proc, idx) => (
                                     <div key={idx} className="flex justify-between items-center bg-slate-50 rounded px-2 py-1 text-[10px] border border-slate-100">
                                         <div className="flex items-center gap-2 overflow-hidden">
-                                            <span className="text-emerald-600 font-bold truncate max-w-[60px]" title={`User: ${proc.username}`}>{proc.username}</span>
-                                            <span className="text-slate-500 truncate max-w-[80px]" title={`PID: ${proc.pid} | CMD: ${proc.command}`}>{proc.command}</span>
+                                            {/* 优先显示新版字段 user/command，回退到旧版 username */}
+                                            <span className="text-emerald-600 font-bold truncate max-w-[60px]" title={`User: ${proc.user || proc.username}`}>
+                                                {proc.user || proc.username}
+                                            </span>
+                                            <span className="text-slate-500 truncate max-w-[80px]" title={`PID: ${proc.pid} | CMD: ${proc.command}`}>
+                                                {proc.command}
+                                            </span>
                                         </div>
-                                        <span className="text-slate-400 font-mono whitespace-nowrap">{Math.round(proc.gpu_memory_usage)}MB</span>
+                                        {/* 兼容 vram_used_mb (新) 和 gpu_memory_usage (旧) */}
+                                        <span className="text-slate-400 font-mono whitespace-nowrap">
+                                            {proc.vram_used_mb ? `${proc.vram_used_mb}MB` : (proc.gpu_memory_usage ? `${Math.round(proc.gpu_memory_usage)}MB` : '')}
+                                        </span>
                                     </div>
                                 ))}
                             </div>
@@ -158,28 +229,56 @@
             );
         };
 
+        const ServerName = ({ name }) => {
+            if (name.includes('冉姐')) {
+                return (
+                    <h3 className="text-base font-bold tracking-tight">
+                        <span className="ran-jie-text">{name}</span><span className="ran-jie-icons">💎💎👑👑</span>
+                    </h3>
+                );
+            }
+            return (
+                <h3 className="text-base font-bold text-slate-800 tracking-tight truncate">
+                    {name}
+                </h3>
+            );
+        };
+
         const ServerCard = ({ server, onDelete }) => {
             const isOffline = server.status === 'offline';
             const data = server.data || {};
             const metrics = server.metrics || { upSpeed: 0, downSpeed: 0 };
             const gpuCount = data.gpus ? data.gpus.length : 0;
+            
+            // 简单的 CPU 型号清洗
             const simpleCpu = data.cpu_model ? data.cpu_model.replace(/Intel\(R\) |Xeon\(R\) |CPU |@ [\d.]+GHz/g, "").trim() : "Unknown CPU";
+            
+            // 运行时间：优先使用新版 uptime_human，没有则计算旧版 uptime_seconds
+            const displayUptime = data.uptime_human 
+                ? data.uptime_human 
+                : (data.uptime_seconds ? `${(data.uptime_seconds / 86400).toFixed(1)}d` : '-');
+
+            // IP 地址：优先使用返回的 ip_address，没有则用 URL 里的 host
+            const displayIp = data.ip_address || (server.url ? server.url.replace('http://', '').split(':')[0] : 'Unknown IP');
 
             return (
-                // 主卡片样式：白底，浅边框，阴影
                 <div className={`relative flex flex-col h-full bg-white border ${isOffline ? 'border-rose-200 bg-rose-50' : 'border-slate-200'} rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1`}>
+                    
+                    {/* Header */}
                     <div className={`p-4 border-b ${isOffline ? 'border-rose-100 bg-rose-50' : 'border-slate-100 bg-slate-50/80'} flex justify-between items-start backdrop-blur-md`}>
                         <div className="overflow-hidden pr-2">
                             <div className="flex items-center gap-2 mb-1">
-                                <h3 className="text-base font-bold text-slate-800 tracking-tight truncate">{server.name}</h3>
+                                <ServerName name={server.name} />
                                 {isOffline ? 
                                     <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-600 border border-rose-200 flex items-center gap-1"><Icons.AlertTriangle /> OFFLINE</span> : 
                                     <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-600 border border-emerald-200 flex items-center gap-1"><Icons.Activity /> ONLINE</span>
                                 }
                             </div>
-                            <div className="text-[10px] font-mono text-slate-500 flex items-center gap-2 truncate">
-                                <span className="flex items-center gap-1"><Icons.Terminal /> {server.url.replace('http://', '')}</span>
-                                {data.uptime_seconds && <span className="flex items-center gap-1"><Icons.Clock /> {(data.uptime_seconds / 86400).toFixed(1)}d</span>}
+                            <div className="text-[10px] font-mono text-slate-500 flex flex-wrap items-center gap-3 truncate">
+                                {/* 显示 IP */}
+                                <span className="flex items-center gap-1 text-slate-600 bg-slate-100 px-1.5 rounded border border-slate-200"><Icons.Network /> {displayIp}</span>
+                                {/* 显示 Uptime */}
+                                <span className="flex items-center gap-1"><Icons.Clock /> {displayUptime}</span>
                             </div>
                         </div>
                         <button onClick={() => onDelete(server.id)} className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-100 rounded-md transition-colors"><Icons.Trash2 /></button>
@@ -193,12 +292,15 @@
                             </div>
                         ) : (
                             <>
-                                {/* 仪表区域背景调整 */}
+                                {/* 仪表区域 */}
                                 <div className="grid grid-cols-3 border-b border-slate-100 divide-x divide-slate-100 bg-slate-50/50 text-center py-3">
                                     <div className="px-2 group">
                                         <div className="text-[10px] uppercase text-slate-400 mb-1 font-bold flex items-center justify-center gap-1"><Icons.Cpu /> CPU</div>
                                         <div className="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors">{data.cpu_usage}%</div>
-                                        <div className="text-[10px] text-slate-500 truncate max-w-full px-1" title={data.cpu_model}>{simpleCpu}</div>
+                                        {/* 如果有核心数，显示核心数 */}
+                                        <div className="text-[10px] text-slate-500 truncate max-w-full px-1" title={data.cpu_model}>
+                                            {data.cpu_cores ? `${data.cpu_cores} Cores` : simpleCpu}
+                                        </div>
                                     </div>
                                     <div className="px-2 group">
                                         <div className="text-[10px] uppercase text-slate-400 mb-1 font-bold flex items-center justify-center gap-1"><Icons.HardDrive /> RAM</div>
@@ -213,12 +315,25 @@
                                         </div>
                                     </div>
                                 </div>
+                                
+                                {/* GPU 列表区域 */}
                                 <div className="p-4 flex-1 bg-slate-50/30">
                                     <div className="flex items-center justify-between mb-3">
                                         <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5"><Icons.Zap /> Accelerators <span className="bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-full">{gpuCount}</span></h4>
                                     </div>
                                     <div className="space-y-2 max-h-[280px] overflow-y-auto custom-scrollbar pr-1">
-                                        {!data.gpus || data.gpus.length === 0 ? <div className="text-center py-8 text-slate-400 text-xs border border-dashed border-slate-300 rounded-lg">无 GPU 设备检测到</div> : data.gpus.map((gpu, idx) => <GpuCard key={idx} index={idx} gpu={gpu} />)}
+                                        {!data.gpus || data.gpus.length === 0 ? (
+                                            <div className="text-center py-8 text-slate-400 text-xs border border-dashed border-slate-300 rounded-lg">无 GPU 设备检测到</div> 
+                                        ) : (
+                                            data.gpus.map((gpu, idx) => (
+                                                <GpuCard 
+                                                    key={idx} 
+                                                    index={idx} 
+                                                    gpu={gpu} 
+                                                    allProcesses={data.processes} // 传入全局进程列表
+                                                />
+                                            ))
+                                        )}
                                     </div>
                                 </div>
                             </>
@@ -229,10 +344,12 @@
         };
 
         const App = () => {
+            // 保持原有 App 逻辑不变
             const [servers, setServers] = useState([]);
             const [isModalOpen, setIsModalOpen] = useState(false);
             const [modalData, setModalData] = useState({ name: "", url: "http://", pin: "" });
             const historyRef = useRef({});
+            const [lastSyncedAt, setLastSyncedAt] = useState(null);
 
             useEffect(() => {
                 const loadConfig = async () => {
@@ -311,6 +428,7 @@
                     });
                     const results = await Promise.all(promises);
                     setServers(results);
+                    setLastSyncedAt(new Date());
                 };
                 fetchAll();
                 const interval = setInterval(fetchAll, 2000);
@@ -342,7 +460,6 @@
 
             return (
                 <div className="min-h-screen pb-20">
-                    {/* 顶部导航：改为白底，浅边框 */}
                     <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                             <div className="flex items-center justify-between h-16">
@@ -359,6 +476,10 @@
                                     <div className="hidden sm:flex items-center gap-6 text-xs font-medium text-slate-500 mr-4">
                                         <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>{activeCount} / {servers.length} Nodes Online</div>
                                         <div className="flex items-center gap-1.5"><span className="text-amber-500"><Icons.Zap /></span>{totalGpus} GPUs Active</div>
+                                        <div className="flex flex-col items-end leading-tight">
+                                            <span className="uppercase tracking-widest text-[10px]">Last Synced</span>
+                                            <span className="font-mono text-slate-700 text-xs">{lastSyncedAt ? formatTime(lastSyncedAt) : '--:--:--'}</span>
+                                        </div>
                                     </div>
                                     <a href="http://meeting.cuizl.cn/" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-slate-700 transition-colors p-2 hover:bg-slate-100 rounded-lg" title="Lab Meeting Lite">
                                         <Icons.Beaker />
@@ -387,7 +508,6 @@
 
                     {isModalOpen && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-                            {/* 弹窗：白底 */}
                             <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-md shadow-2xl p-6 space-y-5">
                                 <div className="flex justify-between items-center border-b border-slate-100 pb-4"><h3 className="text-xl font-bold text-slate-800 flex items-center gap-2"><span className="text-blue-600"><Icons.Server /></span> 添加新节点</h3><button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-700"><Icons.X /></button></div>
                                 <div className="space-y-4">
@@ -421,10 +541,8 @@
                 drops = new Array(columns).fill(0);
             }
             function draw(){
-                // 白色背景的淡出效果
                 ctx.fillStyle = 'rgba(248,250,252,0.1)';
                 ctx.fillRect(0, 0, w, h);
-                // 文字颜色改为淡蓝灰色，适合浅色背景
                 ctx.fillStyle = 'rgba(148,163,184,0.4)'; 
                 ctx.font = fontSize + 'px monospace';
                 for(var i = 0; i < drops.length; i++){
