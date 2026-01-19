@@ -5,15 +5,40 @@ import os
 import sys
 import urllib.request
 import urllib.error
+import time
 from urllib.parse import urlparse, parse_qs
 from datetime import datetime
 
 # 配置端口
 PORT = 3000
 CONFIG_FILE = 'config.json'
+# 记录服务器启动时间作为版本号
+SERVER_START_TIME = int(time.time())
+VERSION_NAME = "V2.0"
+
+# 更新日志 (每次修改代码重启服务后，前端会看到此内容)
+CHANGELOG = """
+1. 优化了处理并非请求的情况，避免了前端总是Connection Lost的问题
+2. 添加了 Updated时间 显示，用于展示最后一次成功同步的时间
+3. 界面优化：更新了看板头部样式与图标
+"""
 
 class ConfigHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
+        # 0. 版本检测接口 (用于前端自动刷新)
+        if self.path == '/api/version':
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                "version": SERVER_START_TIME,
+                "versionName": VERSION_NAME,
+                "changelog": CHANGELOG.strip()
+            }).encode('utf-8'))
+            return
+
         # 1. 获取配置接口
         if self.path == '/api/config':
             self.send_response(200)
@@ -94,13 +119,14 @@ class ConfigHandler(http.server.SimpleHTTPRequestHandler):
                 print(f"❌ Error saving config: {e}")
             return
 
-# 允许地址重用，防止重启时报端口占用
-socketserver.TCPServer.allow_reuse_address = True
+# 使用 ThreadingTCPServer 实现多线程处理，避免单个请求阻塞导致其他请求超时
+class ThreadingHTTPServer(socketserver.ThreadingTCPServer):
+    allow_reuse_address = True
 
 print(f"🚀 Nexus Gateway running at http://0.0.0.0:{PORT}")
 print(f"📂 Configuration will be saved to: {os.path.abspath(CONFIG_FILE)}")
 
-with socketserver.TCPServer(("", PORT), ConfigHandler) as httpd:
+with ThreadingHTTPServer(("", PORT), ConfigHandler) as httpd:
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
