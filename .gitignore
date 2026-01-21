@@ -1,1 +1,2 @@
 **/*.json
+dashboard/__pycache__/*

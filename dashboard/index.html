@@ -111,6 +111,7 @@
             background-size: 40px 40px;
             mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
         }
+
     </style>
 </head>
 <body>
@@ -238,12 +239,20 @@
             );
         };
 
-        const ServerName = ({ name, isVip }) => {
+        const ServerName = ({ name, isVip, isCloud }) => {
             if (isVip) {
                 return (
                     <div className="flex items-center">
                         <h3 className="text-lg ran-jie-title drop-shadow-sm">{name}</h3>
                         <span className="text-base ml-1.5 animate-float">💎💎👑👑</span>
+                    </div>
+                );
+            }
+            if (isCloud) {
+                return (
+                    <div className="flex items-center gap-1.5">
+                        <span className="text-base animate-pulse">☁️</span>
+                        <h3 className="text-sm font-bold text-sky-700 tracking-tight truncate">{name}</h3>
                     </div>
                 );
             }
@@ -326,6 +335,7 @@
 
         const ServerCard = ({ server, onDelete }) => {
             const isVip = server.name.includes('冉姐');
+            const isCloud = server.name.startsWith('浪潮');
             const isOffline = server.status === 'offline';
             const data = server.data || {};
             const metrics = server.metrics || { upSpeed: 0, downSpeed: 0 };
@@ -338,6 +348,10 @@
                 // VIP Styles
                 containerClass += " vip-card-border vip-glow scale-[1.02] hover:scale-[1.03]";
                 headerClass += " border-pink-200 bg-gradient-to-r from-pink-50/90 to-amber-50/90";
+            } else if (isCloud) {
+                // Cloud Server Styles
+                containerClass += " border border-sky-200 shadow-sm hover:shadow-xl hover:shadow-sky-200/50 hover:-translate-y-1";
+                headerClass += " border-sky-100 bg-gradient-to-r from-sky-50/90 to-blue-50/90";
             } else if (isOffline) {
                 containerClass += " border border-rose-200 bg-rose-50/30";
                 headerClass += " border-rose-100 bg-rose-50/50";
@@ -359,7 +373,7 @@
                         {isVip && <div className="vip-header-shine"></div>}
                         <div className="overflow-hidden pr-2 z-20">
                             <div className="flex items-center gap-2 mb-1">
-                                <ServerName name={server.name} isVip={isVip} />
+                                <ServerName name={server.name} isVip={isVip} isCloud={isCloud} />
                                 {isOffline ? 
                                     <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black bg-rose-100 text-rose-600 border border-rose-200 flex items-center gap-1"><Icons.AlertTriangle /> OFF</span> : 
                                     <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black bg-emerald-100 text-emerald-600 border border-emerald-200 flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"/> ON</span>
@@ -585,7 +599,7 @@
                                     <div className="hidden md:flex items-center gap-6 text-xs font-semibold text-slate-500 mr-2 bg-slate-50/50 px-4 py-1.5 rounded-full border border-slate-100">
                                         <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> {activeCount} Online</div>
                                         <div className="flex items-center gap-1"><span className="text-amber-500"><Icons.Zap /></span> {totalGpus} GPUs</div>
-                                        <div className="flex items-center gap-1" title="Last Synced Time"><span className="text-blue-500"><Icons.Clock /></span> {lastSyncedAt ? formatTime(lastSyncedAt) : '--:--:--'}</div>
+                                        
                                     </div>
                                     
                                     <div className="flex items-center gap-2">

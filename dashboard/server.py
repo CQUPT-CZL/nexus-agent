@@ -18,9 +18,8 @@ VERSION_NAME = "V2.0"
 
 # 更新日志 (每次修改代码重启服务后，前端会看到此内容)
 CHANGELOG = """
-1. 优化了处理并非请求的情况，避免了前端总是Connection Lost的问题
-2. 添加了 Updated时间 显示，用于展示最后一次成功同步的时间
-3. 界面优化：更新了看板头部样式与图标
+1.删除了Updated时间时间，因为它没有实际意义
+2.添加了浪潮服务器卡片的蓝色效果
 """
 
 class ConfigHandler(http.server.SimpleHTTPRequestHandler):
