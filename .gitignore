@@ -1,2 +1,4 @@
 **/*.json
 dashboard/__pycache__/*
+agent/venv/*
+*.log
