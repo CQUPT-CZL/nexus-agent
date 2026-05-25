@@ -9,6 +9,7 @@
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;600;800&display=swap');
 
@@ -63,6 +64,58 @@
             transform: translateY(-4px);
         }
 
+        .md-doc {
+            color: #334155;
+            line-height: 1.75;
+            font-size: 14px;
+        }
+        .md-doc h1, .md-doc h2, .md-doc h3 {
+            color: #0f172a;
+            font-weight: 800;
+            line-height: 1.3;
+            margin-top: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+        .md-doc h1 { font-size: 1.75rem; }
+        .md-doc h2 { font-size: 1.2rem; }
+        .md-doc h3 { font-size: 1rem; }
+        .md-doc p, .md-doc ul, .md-doc ol, .md-doc pre {
+            margin: 0.75rem 0;
+        }
+        .md-doc ul, .md-doc ol {
+            padding-left: 1.5rem;
+        }
+        .md-doc li {
+            margin: 0.35rem 0;
+        }
+        .md-doc code {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 0.15rem 0.35rem;
+            border-radius: 0.45rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9em;
+        }
+        .md-doc pre {
+            background: #0f172a;
+            color: #e2e8f0;
+            border-radius: 1rem;
+            padding: 1rem;
+            overflow: auto;
+        }
+        .md-doc pre code {
+            background: transparent;
+            border: 0;
+            color: inherit;
+            padding: 0;
+        }
+        .md-doc blockquote {
+            border-left: 4px solid #cbd5e1;
+            padding-left: 1rem;
+            color: #475569;
+            margin: 1rem 0;
+        }
+
     </style>
 </head>
 <body>
@@ -77,27 +130,35 @@
 
         // --- Icons ---
         const Icons = {
-            Github: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>,
-            Beaker: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4.5 3h15"/><path d="M6 3v16a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V3"/><path d="M6 14h12"/></svg>,
-            Server: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>,
-            Activity: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>,
-            Cpu: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>,
-            Zap: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
-            Plus: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>,
-            Trash2: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>,
-            Thermometer: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>,
-            HardDrive: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" x2="2" y1="12" y2="12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><line x1="6" x2="6.01" y1="16" y2="16"/><line x1="10" x2="10.01" y1="16" y2="16"/></svg>,
-            Network: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></svg>,
-            Clock: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
-            X: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>,
-            AlertTriangle: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>,
-            Wifi: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.55a11 11 0 0 1 14 0"/><path d="M1.42 9.17a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>,
-            Users: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
-            ChevronDown: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>,
-            Wind: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg>,
-            Bolt: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>,
-            Database: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>,
-            LayoutDashboard: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="7" height="9" x="3" y="3" rx="1" /><rect width="7" height="5" x="14" y="3" rx="1" /><rect width="7" height="9" x="14" y="12" rx="1" /><rect width="7" height="5" x="3" y="16" rx="1" /></svg>
+            Github: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>,
+            Beaker: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4.5 3h15"/><path d="M6 3v16a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V3"/><path d="M6 14h12"/></svg>,
+            Server: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>,
+            Activity: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>,
+            Cpu: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>,
+            Zap: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
+            Plus: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>,
+            Trash2: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>,
+            Thermometer: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>,
+            HardDrive: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" x2="2" y1="12" y2="12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><line x1="6" x2="6.01" y1="16" y2="16"/><line x1="10" x2="10.01" y1="16" y2="16"/></svg>,
+            Network: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></svg>,
+            Clock: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+            X: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>,
+            AlertTriangle: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>,
+            Wifi: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.55a11 11 0 0 1 14 0"/><path d="M1.42 9.17a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>,
+            Users: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+            ChevronDown: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>,
+            Wind: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg>,
+            Bolt: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>,
+            Database: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>,
+            LayoutDashboard: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="7" height="9" x="3" y="3" rx="1" /><rect width="7" height="5" x="14" y="3" rx="1" /><rect width="7" height="9" x="14" y="12" rx="1" /><rect width="7" height="5" x="3" y="16" rx="1" /></svg>,
+            Shield: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
+            Lock: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
+            Eye: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>,
+            Image: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>,
+            Pencil: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 1 1 3 3L7 19l-4 1-1-4Z"/></svg>,
+            Save: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>,
+            FileText: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>,
+            MapPin: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
         };
 
         // --- Helpers ---
@@ -137,6 +198,14 @@
             for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
             return colors[Math.abs(hash) % colors.length];
         };
+        const normalizeServer = (server) => ({
+            ...server,
+            locationText: server.locationText || '',
+            locationPhoto: server.locationPhoto || '',
+            status: server.status || 'pending',
+            data: Object.prototype.hasOwnProperty.call(server, 'data') ? server.data : null,
+            metrics: Object.prototype.hasOwnProperty.call(server, 'metrics') ? server.metrics : null
+        });
 
         // --- Components ---
 
@@ -276,7 +345,120 @@
             );
         };
 
-        const ServerCard = ({ server, onDelete }) => {
+        const AdminServerModal = ({ server, onClose, onSave }) => {
+            const [formData, setFormData] = useState({ locationText: "", locationPhoto: "" });
+
+            useEffect(() => {
+                if (!server) return;
+                setFormData({
+                    locationText: server.locationText || "",
+                    locationPhoto: server.locationPhoto || ""
+                });
+            }, [server]);
+
+            if (!server) return null;
+
+            return (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-fade-in">
+                    <div className="bg-white rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden">
+                        <div className="flex items-center justify-between p-5 border-b border-slate-200 bg-white/90">
+                            <div className="min-w-0">
+                                <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Server Admin</div>
+                                <h3 className="text-xl font-bold text-slate-800 mt-1 truncate">{server.name}</h3>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button onClick={onClose} className="w-11 h-11 rounded-xl border border-slate-200 text-slate-400 hover:text-slate-700 hover:bg-slate-50 flex items-center justify-center transition-colors"><Icons.X /></button>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr]">
+                            <div className="p-6 space-y-5 border-r border-slate-100">
+                                <div className="rounded-2xl border p-5 border-slate-200 bg-slate-50/70">
+                                    <div className="flex items-center gap-2 text-sm font-bold text-slate-700 mb-5"><Icons.MapPin /> 位置与实拍信息</div>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-[11px] font-bold text-slate-500 mb-1.5 uppercase tracking-widest">位置信息</label>
+                                            <input type="text" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-bold" placeholder="例如：A区机房 - 4090机柜" value={formData.locationText} onChange={e => setFormData({ ...formData, locationText: e.target.value })} />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[11px] font-bold text-slate-500 mb-1.5 uppercase tracking-widest">上传实拍图</label>
+                                            <input type="file" accept="image/*" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 outline-none transition-all file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" onChange={(e) => {
+                                                const file = e.target.files[0];
+                                                if(file){
+                                                    const reader = new FileReader();
+                                                    reader.onloadend = () => setFormData({...formData, locationPhoto: reader.result});
+                                                    reader.readAsDataURL(file);
+                                                }
+                                            }} />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex justify-end">
+                                    <button onClick={() => onSave(server.id, formData)} className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-5 py-3 rounded-xl shadow-lg shadow-slate-900/15 transition-all">
+                                        <Icons.Save /> 保存配置
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="bg-slate-50/70 p-6">
+                                {formData.locationPhoto ? (
+                                    <div className="rounded-2xl overflow-hidden border border-slate-200 bg-slate-950 shadow-sm h-full max-h-[360px] relative group">
+                                        <img src={formData.locationPhoto} alt={`${server.name} location`} className="w-full h-full object-cover bg-slate-950 transition-opacity" />
+                                    </div>
+                                ) : (
+                                    <div className="h-[360px] rounded-2xl border border-dashed border-slate-300 bg-white flex flex-col items-center justify-center gap-3 text-slate-400">
+                                        <div className="w-14 h-14 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center"><Icons.Image /></div>
+                                        <div className="text-sm font-semibold">未设置实拍图</div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // 全局图片大图查看器
+        const PhotoViewerModal = ({ photoUrl, onClose }) => {
+            if (!photoUrl) return null;
+            return (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4 animate-fade-in" onClick={onClose}>
+                    <div className="relative max-w-5xl w-full" onClick={e => e.stopPropagation()}>
+                        <button onClick={onClose} className="absolute -top-12 right-0 text-white/70 hover:text-white transition-colors" title="关闭查看">
+                            <Icons.X className="w-8 h-8" />
+                        </button>
+                        <img src={photoUrl} alt="实拍大图" className="w-full h-auto max-h-[85vh] object-contain rounded-2xl shadow-2xl bg-slate-900" />
+                    </div>
+                </div>
+            );
+        };
+
+        const AdminDocModal = ({ isOpen, onClose, content, isLoading }) => {
+            if (!isOpen) return null;
+            const html = window.marked ? window.marked.parse(content || '') : `<pre>${content || ''}</pre>`;
+            return (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-fade-in">
+                    <div className="bg-white rounded-2xl w-full max-w-5xl shadow-2xl overflow-hidden">
+                        <div className="flex items-center justify-between p-5 border-b border-slate-200 bg-white/90">
+                            <div className="min-w-0">
+                                <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Technical Doc</div>
+                                <h3 className="text-xl font-bold text-slate-800 mt-1 truncate">管理员技术文档</h3>
+                            </div>
+                            <button onClick={onClose} className="w-11 h-11 rounded-xl border border-slate-200 text-slate-400 hover:text-slate-700 hover:bg-slate-50 flex items-center justify-center transition-colors">
+                                <Icons.X />
+                            </button>
+                        </div>
+                        <div className="max-h-[78vh] overflow-y-auto custom-scrollbar p-8 bg-slate-50/50">
+                            {isLoading ? (
+                                <div className="py-20 text-center text-slate-400">Loading...</div>
+                            ) : (
+                                <div className="md-doc" dangerouslySetInnerHTML={{ __html: html }} />
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const ServerCard = ({ server, onDelete, isAdminMode, onOpenEditor, onViewPhoto }) => {
             const isCloud = server.name.startsWith('浪潮');
             const isOffline = server.status === 'offline';
             const data = server.data || {};
@@ -310,11 +492,34 @@
                                     <span className="px-2 py-1 rounded-full text-[9px] font-black bg-emerald-100 text-emerald-600 border border-emerald-200 flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"/> ON</span>
                                 }
                             </div>
-                            <div className="text-[10px] font-mono text-slate-400 flex flex-wrap items-center gap-3">
+                            <div className="text-[10px] font-mono text-slate-400 flex flex-wrap items-center gap-2 mt-2">
                                 <span className="flex items-center gap-1 bg-slate-100/50 px-2 py-1 rounded-full"><Icons.Network /> {data.ip_address || (server.url ? server.url.replace('http://', '').split(':')[0] : 'IP...')}</span>
+                                {server.locationText && (
+                                    <span className="flex items-center gap-1 bg-slate-100/50 px-2 py-1 rounded-full text-slate-500 font-sans font-medium"><Icons.MapPin /> {server.locationText}</span>
+                                )}
                             </div>
                         </div>
-                        <button onClick={() => onDelete(server.id)} className="p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors z-20"><Icons.Trash2 /></button>
+                        <div className="flex items-center gap-2">
+                            {/* 非管理员且有实拍图，显示查看图片按钮 */}
+                            {server.locationPhoto && !isAdminMode && (
+                                <button onClick={() => onViewPhoto(server.locationPhoto)} className="w-10 h-10 text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border border-emerald-100 rounded-xl transition-colors z-20 flex items-center justify-center" title="查看实拍图">
+                                    <Icons.Image />
+                                </button>
+                            )}
+                            
+                            {/* 管理员模式，编辑按钮同样改为 Image 图标 */}
+                            {isAdminMode && (
+                                <button onClick={() => onOpenEditor(server)} className="w-10 h-10 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 rounded-xl transition-colors z-20 flex items-center justify-center" title="编辑位置与实拍图">
+                                    <Icons.Image />
+                                </button>
+                            )}
+
+                            {isAdminMode && (
+                                <button onClick={() => onDelete(server.id)} className="p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors z-20" title="移除节点">
+                                    <Icons.Trash2 />
+                                </button>
+                            )}
+                        </div>
                     </div>
 
                     <div className="flex-1 flex flex-col relative z-20 bg-white/50">
@@ -362,10 +567,25 @@
             const [servers, setServers] = useState([]);
             const [isModalOpen, setIsModalOpen] = useState(false);
             const [isActivityOpen, setIsActivityOpen] = useState(false);
-            const [modalData, setModalData] = useState({ name: "", url: "http://", pin: "" });
+            const [isAdminAuthOpen, setIsAdminAuthOpen] = useState(false);
+            const [isAdminMode, setIsAdminMode] = useState(false);
+            const [isDocOpen, setIsDocOpen] = useState(false);
+            const [docContent, setDocContent] = useState('');
+            const [isDocLoading, setIsDocLoading] = useState(false);
+            const [adminPin, setAdminPin] = useState("");
+            const [editingServer, setEditingServer] = useState(null);
+            const [viewingPhoto, setViewingPhoto] = useState(null); // 查看实拍图的 URL
+            const [modalData, setModalData] = useState({ name: "", url: "http://", locationText: "", locationPhoto: "" });
+            const [adminPinInput, setAdminPinInput] = useState("");
             const historyRef = useRef({});
             const [lastSyncedAt, setLastSyncedAt] = useState(null);
             const versionRef = useRef(null);
+
+            // 关键：将 servers 保存在 ref 中，避免闭包陷阱，同时允许轮询平滑获取最新的本地属性
+            const serversRef = useRef(servers);
+            useEffect(() => {
+                serversRef.current = servers;
+            }, [servers]);
 
             // --- Version Check Logic ---
             useEffect(() => {
@@ -375,10 +595,8 @@
                         if (res.ok) {
                             const data = await res.json();
                             const lastVersion = versionRef.current;
-                            console.log(`[Version Check] Server: ${data.version} | Local: ${lastVersion}`);
 
                             if (lastVersion !== null && lastVersion !== data.version) {
-                                console.log("New version detected!", lastVersion, "->", data.version);
                                 const vName = data.versionName ? ` ${data.versionName}` : "";
                                 const changelog = data.changelog ? `\n\n更新内容：\n${data.changelog}` : "";
                                 if (confirm(`✨ 系统检测到新版本更新${vName}！${changelog}\n\n是否立即刷新以获取最新功能？`)) {
@@ -394,25 +612,31 @@
                 return () => clearInterval(interval);
             }, []);
 
-            // --- Logic reused from original ---
+            // --- 数据加载 ---
             useEffect(() => {
                 const loadConfig = async () => {
                     try {
                         const res = await fetch('/api/config');
                         if (res.ok) {
                             const data = await res.json();
-                            setServers(data.map(s => ({...s, status: 'pending', data: null, metrics: null})));
+                            setServers(data.map(s => normalizeServer({ ...s, status: 'pending', data: null, metrics: null })));
                         } else throw new Error();
                     } catch {
                         const saved = localStorage.getItem('nexus_servers_fallback');
-                        if (saved) setServers(JSON.parse(saved).map(s => ({...s, status: 'pending', data: null, metrics: null})));
+                        if (saved) setServers(JSON.parse(saved).map(s => normalizeServer({ ...s, status: 'pending', data: null, metrics: null })));
                     }
                 };
                 loadConfig();
             }, []);
 
             const saveConfig = async (newServersList, pin) => {
-                const configToSave = newServersList.map(s => ({ id: s.id, name: s.name, url: s.url }));
+                const configToSave = newServersList.map(s => ({
+                    id: s.id,
+                    name: s.name,
+                    url: s.url,
+                    locationText: s.locationText || '',
+                    locationPhoto: s.locationPhoto || ''
+                }));
                 try {
                     const res = await fetch('/api/config', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-PIN': pin || '' }, body: JSON.stringify(configToSave) });
                     if (res.ok) return true;
@@ -425,10 +649,17 @@
                 }
             };
 
+            // --- 核心修复：基于 Refs 和函数式更新的轮询，彻底解决“刷新后才显示”的 Bug ---
             useEffect(() => {
+                // 如果节点还没加载出来，先不开启轮询（避免覆盖）
                 if (servers.length === 0) return;
+                let active = true;
+
                 const fetchAll = async () => {
-                    const promises = servers.map(async (server) => {
+                    const currentServers = serversRef.current;
+                    if (currentServers.length === 0) return;
+
+                    const promises = currentServers.map(async (server) => {
                         try {
                             const controller = new AbortController();
                             setTimeout(() => controller.abort(), 3000);
@@ -439,6 +670,7 @@
                             catch { res = await fetch(targetUrl, { signal: controller.signal }); }
                             if (!res.ok) throw new Error();
                             const jsonData = await res.json();
+                            
                             const currentTime = Date.now();
                             const history = historyRef.current[server.url];
                             let upSpeed = 0, downSpeed = 0;
@@ -450,32 +682,107 @@
                                 }
                             }
                             historyRef.current[server.url] = { timestamp: currentTime, sent: jsonData.net_sent_mb, recv: jsonData.net_recv_mb };
-                            return { ...server, status: 'online', data: jsonData, metrics: { upSpeed, downSpeed } };
-                        } catch { return { ...server, status: 'offline' }; }
+                            
+                            // 这里只返回网络获取到的**动态指标数据**
+                            return { id: server.id, status: 'online', data: jsonData, metrics: { upSpeed, downSpeed } };
+                        } catch { 
+                            return { id: server.id, status: 'offline', data: null, metrics: null }; 
+                        }
                     });
-                    const results = await Promise.all(promises);
-                    setServers(results);
+                    
+                    const fetchedResults = await Promise.all(promises);
+                    if (!active) return;
+                    
+                    // 用函数式更新，只覆盖旧 state 里的动态指标字段，保留所有本地属性（包括刚修改的 location）
+                    setServers(prevServers => prevServers.map(ps => {
+                        const fetched = fetchedResults.find(r => r.id === ps.id);
+                        return fetched ? normalizeServer({ 
+                            ...ps, 
+                            status: fetched.status, 
+                            data: fetched.data, 
+                            metrics: fetched.metrics 
+                        }) : ps;
+                    }));
                     setLastSyncedAt(new Date());
                 };
-                fetchAll();
+
+                fetchAll(); // 启动时主动拉取一次
                 const interval = setInterval(fetchAll, 2000);
-                return () => clearInterval(interval);
-            }, [servers.length]);
+                return () => { active = false; clearInterval(interval); };
+            }, [servers.length]); // 只有当节点数量变化（新增/删除）时才重建轮询生命周期
 
             const addServer = async () => {
-                const newServer = { id: Date.now(), name: modalData.name, url: modalData.url, status: 'pending' };
+                if (!adminPin) { alert('Admin session expired'); return; }
+                const newServer = normalizeServer({
+                    id: Date.now(),
+                    name: modalData.name,
+                    url: modalData.url,
+                    locationText: modalData.locationText,
+                    locationPhoto: modalData.locationPhoto,
+                    status: 'pending'
+                });
                 const newList = [...servers, newServer];
-                if (!(await saveConfig(newList, modalData.pin))) { alert('Error/PIN Incorrect (MMDD)'); return; }
-                setServers(newList); setIsModalOpen(false); setModalData({name: "", url: "http://", pin: ""});
+                if (!(await saveConfig(newList, adminPin))) { alert('Save failed'); return; }
+                setServers(newList); 
+                setIsModalOpen(false); 
+                setModalData({name: "", url: "http://", locationText: "", locationPhoto: ""});
             };
 
             const deleteServer = async (id) => {
-                if(!confirm("Delete node?")) return;
-                const pin = prompt("Admin PIN (MMDD)");
-                if (!pin) return;
+                if (!adminPin) { alert('Admin session expired'); return; }
+                if(!confirm("确认要移除该节点吗？")) return;
                 const newList = servers.filter(x => x.id !== id);
-                if (!(await saveConfig(newList, pin))) { alert('Error/PIN Incorrect'); return; }
+                if (!(await saveConfig(newList, adminPin))) { alert('Save failed'); return; }
                 setServers(newList);
+            };
+
+            const handleAdminAccess = () => {
+                if (isAdminMode) {
+                    setIsAdminMode(false);
+                    setAdminPin("");
+                    setEditingServer(null);
+                    setAdminPinInput("");
+                    return;
+                }
+                setIsAdminAuthOpen(true);
+            };
+
+            const unlockAdminMode = () => {
+                if (!validatePin(adminPinInput)) {
+                    alert('管理员密码错误，请输入当天 MMDD');
+                    return;
+                }
+                setAdminPin(adminPinInput);
+                setIsAdminMode(true);
+                setIsAdminAuthOpen(false);
+                setAdminPinInput("");
+            };
+
+            const openAdminDoc = async () => {
+                setIsDocOpen(true);
+                if (docContent) return;
+                setIsDocLoading(true);
+                try {
+                    const res = await fetch('/admin-doc.md');
+                    const text = await res.text();
+                    setDocContent(text);
+                } catch {
+                    setDocContent('# 文档加载失败\n\n请检查 `dashboard/admin-doc.md` 是否存在。');
+                } finally {
+                    setIsDocLoading(false);
+                }
+            };
+
+            const openServerEditor = (server) => {
+                setEditingServer(server);
+            };
+
+            const saveServerDetails = async (id, updates) => {
+                // 直接更新本地 state
+                const newList = servers.map(server => server.id === id ? normalizeServer({ ...server, ...updates }) : server);
+                if (!(await saveConfig(newList, adminPin))) { alert('Save failed'); return; }
+                setServers(newList);
+                setEditingServer(null);
             };
 
             const activeCount = servers.filter(s => s.status === 'online').length;
@@ -484,6 +791,7 @@
                 .filter(s => s.status === 'online' && s.data?.processes)
                 .flatMap(s => s.data.processes.map(p => ({ ...p, serverName: s.name })))
                 .filter(p => !['root','gdm'].includes((p.user||'').toLowerCase()));
+            
             const activeUsersCount = useMemo(() => {
                 const totals = {};
                 allProcesses.forEach(p => {
@@ -527,14 +835,22 @@
                                     </div>
                                     
                                     <div className="flex items-center gap-2">
-                                        <a href="http://10.16.27.222:3002/" target="_blank" className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"><Icons.Beaker /></a>
-                                        <a href="https://github.com/CQUPT-CZL/nexus-agent" target="_blank" className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"><Icons.Github /></a>
+                                        <a href="http://10.16.27.222:3002/" target="_blank" className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all" title="实验室工具"><Icons.Beaker /></a>
+                                        <a href="https://github.com/CQUPT-CZL/nexus-agent" target="_blank" className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all" title="GitHub 仓库"><Icons.Github /></a>
                                         <div className="h-6 w-px bg-slate-200 mx-1"></div>
-                                        <button onClick={() => setIsActivityOpen(true)} className="flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-3 py-1.5 rounded-lg text-sm font-bold transition-all shadow-sm" title="只统计显存占用 ≥ 0.1G 的用户">
-                                            <Icons.Users /> <span className="hidden sm:inline">GPU Users</span>
-                                            {activeUsersCount > 0 && <span className="bg-indigo-600 text-white text-[10px] px-1.5 rounded-full">{activeUsersCount}</span>}
+                                        <button onClick={() => setIsActivityOpen(true)} className="relative flex items-center justify-center bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 w-10 h-10 rounded-lg text-sm font-bold transition-all shadow-sm" title="当前在线的活跃用户">
+                                            <Icons.Users />
+                                            {activeUsersCount > 0 && <span className="absolute -top-1 -right-1 bg-indigo-600 text-white text-[10px] min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center">{activeUsersCount}</span>}
                                         </button>
-                                        <button onClick={() => setIsModalOpen(true)} className="bg-slate-900 hover:bg-slate-800 text-white p-2 rounded-lg shadow-lg shadow-slate-900/20 transition-all active:scale-95"><Icons.Plus /></button>
+                                        {isAdminMode && (
+                                            <button onClick={() => setIsModalOpen(true)} className="bg-indigo-600 hover:bg-indigo-700 text-white w-10 h-10 rounded-lg shadow-lg shadow-indigo-600/20 transition-all active:scale-95 flex items-center justify-center" title="添加新的监控节点"><Icons.Plus /></button>
+                                        )}
+                                        {isAdminMode && (
+                                            <button onClick={openAdminDoc} className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 w-10 h-10 rounded-lg shadow-sm transition-all active:scale-95 flex items-center justify-center" title="管理员技术文档"><Icons.FileText /></button>
+                                        )}
+                                        <button onClick={handleAdminAccess} className={`${isAdminMode ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20' : 'bg-slate-900 hover:bg-slate-800 shadow-slate-900/20'} text-white w-10 h-10 rounded-lg shadow-lg transition-all active:scale-95 flex items-center justify-center`} title={isAdminMode ? '退出管理模式' : '管理员登录'}>
+                                            <Icons.Shield />
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -547,39 +863,96 @@
                                 <div className="p-6 bg-white rounded-2xl shadow-xl mb-6 text-indigo-500 scale-125"><Icons.Server /></div>
                                 <h2 className="text-2xl font-bold text-slate-800 mb-2">No Active Nodes</h2>
                                 <p className="text-slate-500 mb-8 text-center max-w-md">Connect your first Agent to start monitoring.</p>
-                                <button onClick={() => setIsModalOpen(true)} className="px-8 py-3 bg-slate-900 text-white rounded-xl font-bold hover:scale-105 transition-all shadow-xl">Connect Node</button>
+                                {isAdminMode ? (
+                                    <button onClick={() => setIsModalOpen(true)} className="w-14 h-14 bg-slate-900 text-white rounded-2xl font-bold hover:scale-105 transition-all shadow-xl flex items-center justify-center" title="添加节点"><Icons.Plus /></button>
+                                ) : (
+                                    <button onClick={() => setIsAdminAuthOpen(true)} className="w-14 h-14 bg-slate-900 text-white rounded-2xl font-bold hover:scale-105 transition-all shadow-xl flex items-center justify-center" title="管理员模式"><Icons.Shield /></button>
+                                )}
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                                {servers.map(s => <ServerCard key={s.id} server={s} onDelete={deleteServer} />)}
+                                {servers.map(s => (
+                                    <ServerCard
+                                        key={s.id}
+                                        server={s}
+                                        onDelete={deleteServer}
+                                        isAdminMode={isAdminMode}
+                                        onOpenEditor={openServerEditor}
+                                        onViewPhoto={setViewingPhoto}
+                                    />
+                                ))}
                             </div>
                         )}
                     </main>
 
+                    {/* Modals 区域 */}
                     <ActivityDrawer isOpen={isActivityOpen} onClose={() => setIsActivityOpen(false)} processes={allProcesses} />
+                    <AdminServerModal server={editingServer} onClose={() => setEditingServer(null)} onSave={saveServerDetails} />
+                    <AdminDocModal isOpen={isDocOpen} onClose={() => setIsDocOpen(false)} content={docContent} isLoading={isDocLoading} />
+                    
+                    {/* 非管理员点击查看的大图弹出层 */}
+                    {viewingPhoto && (
+                        <PhotoViewerModal photoUrl={viewingPhoto} onClose={() => setViewingPhoto(null)} />
+                    )}
 
-                    {/* Modal */}
-                    {isModalOpen && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-fade-in">
+                    {/* 管理员验证框 */}
+                    {isAdminAuthOpen && (
+                        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-fade-in">
                             <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl p-6 space-y-6 transform transition-all scale-100">
-                                <div className="flex justify-between items-center"><h3 className="text-xl font-bold text-slate-800">Add Node</h3><button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-700"><Icons.X /></button></div>
-                                <div className="space-y-4">
-                                    <div className="group">
-                                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Node Name</label>
-                                        <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all font-bold" placeholder="e.g. Lab 4090" value={modalData.name} onChange={e => setModalData({...modalData, name: e.target.value})} />
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-emerald-500">Administrator</div>
+                                        <h3 className="text-xl font-bold text-slate-800 mt-1">进入管理员模式</h3>
                                     </div>
+                                    <button onClick={() => { setIsAdminAuthOpen(false); setAdminPinInput(""); }} className="text-slate-400 hover:text-slate-700" title="关闭"><Icons.X /></button>
+                                </div>
+                                <div className="space-y-3">
                                     <div className="group">
-                                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Agent URL</label>
-                                        <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all font-mono text-sm" placeholder="http://192.168.1.x:8005" value={modalData.url} onChange={e => setModalData({...modalData, url: e.target.value})} />
-                                    </div>
-                                    <div className="group">
-                                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Security PIN</label>
-                                        <input type="text" inputMode="numeric" maxLength={4} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all font-mono text-center tracking-[0.5em] font-bold" placeholder="••••" value={modalData.pin} onChange={e => setModalData({...modalData, pin: e.target.value.replace(/\D/g,'')})} />
+                                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">管理员 PIN</label>
+                                        <input type="text" inputMode="numeric" maxLength={4} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all font-mono text-center tracking-[0.5em] font-bold" placeholder="••••" value={adminPinInput} onChange={e => setAdminPinInput(e.target.value.replace(/\D/g,''))} />
                                     </div>
                                 </div>
                                 <div className="flex gap-3 pt-2">
-                                    <button onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-3 text-sm font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">Cancel</button>
-                                    <button onClick={addServer} className="flex-1 px-4 py-3 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-lg shadow-indigo-200 transition-all hover:scale-[1.02]">Connect Agent</button>
+                                    <button onClick={() => { setIsAdminAuthOpen(false); setAdminPinInput(""); }} className="flex-1 px-4 py-3 text-sm font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">取消</button>
+                                    <button onClick={unlockAdminMode} className="flex-1 px-4 py-3 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-lg shadow-emerald-200 transition-all hover:scale-[1.02]">进入管理</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 添加新节点 Modal */}
+                    {isModalOpen && (
+                        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-fade-in">
+                            <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl p-6 space-y-6 transform transition-all scale-100">
+                                <div className="flex justify-between items-center"><h3 className="text-xl font-bold text-slate-800">接入新节点</h3><button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-700"><Icons.X /></button></div>
+                                <div className="space-y-4">
+                                    <div className="group">
+                                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">节点名称</label>
+                                        <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all font-bold" placeholder="e.g. Lab 4090" value={modalData.name} onChange={e => setModalData({...modalData, name: e.target.value})} />
+                                    </div>
+                                    <div className="group">
+                                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Agent 接口地址</label>
+                                        <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all font-mono text-sm" placeholder="http://192.168.1.x:8005" value={modalData.url} onChange={e => setModalData({...modalData, url: e.target.value})} />
+                                    </div>
+                                    <div className="group">
+                                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">位置信息</label>
+                                        <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all font-bold" placeholder="例如：A区机房 - 4090机柜" value={modalData.locationText} onChange={e => setModalData({...modalData, locationText: e.target.value})} />
+                                    </div>
+                                    <div className="group">
+                                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">上传实拍图</label>
+                                        <input type="file" accept="image/*" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" onChange={(e) => {
+                                            const file = e.target.files[0];
+                                            if(file){
+                                                const reader = new FileReader();
+                                                reader.onloadend = () => setModalData({...modalData, locationPhoto: reader.result});
+                                                reader.readAsDataURL(file);
+                                            }
+                                        }} />
+                                    </div>
+                                </div>
+                                <div className="flex gap-3 pt-2">
+                                    <button onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-3 text-sm font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">取消</button>
+                                    <button onClick={addServer} className="flex-1 px-4 py-3 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-lg shadow-indigo-200 transition-all hover:scale-[1.02]">确定接入</button>
                                 </div>
                             </div>
                         </div>
